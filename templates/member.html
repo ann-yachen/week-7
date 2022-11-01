@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeHelp Assignment: Week-7</title>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="welcome">這是會員頁</div>
+    </header>
+    <main>
+        <div class="container">
+            <div><span id="memberName">{{ name }}</span>，歡迎登入系統</div>
+            <div><a href="/signout">登出系統</a></div>
+        </div>
+        <div class="container">
+            <!-- Request-2 -->
+            <div>查詢會員姓名</div>
+            <div><input type="text" id="inputUserName" /><input type="button" value="查詢" onclick="queryName()" /></div>
+            <div id="showName">
+                <!-- Generate by js -->
+            </div>
+        </div>
+        <div class="container">
+            <div>更新我的姓名</div>
+            <div><input type="text" id="newName" /><input type="submit" value="更新" onclick="updateName()" /></div>
+            <div id="updateResult">
+                <!-- Generate by js -->
+            </div>
+        </div>
+    </main>
+    <script>
+        /* Request-2 */
+        /* Get the username from input value to generate the corrsponding url for Fetch */
+        function queryName(){
+            let inputUserName = document.querySelector("#inputUserName").value;
+            let src = "/api/member?username=" + inputUserName;
+            fetch(src).then(function(response){
+                return response.json();
+            }).then(renderQueryName);
+        }
+        /* Show the name from json by Fetch */
+        function renderQueryName(memberApi){
+            let showName = document.querySelector("#showName");
+            showName.textContent = memberApi["data"]["name"] + " (" + memberApi["data"]["username"] + ")";
+        }
+        /* Request-3 */
+        /* Get the name from input value to update the name of member in database by PATCH  */
+        function updateName(){
+            let newName = document.querySelector("#newName").value;
+            fetch("/api/member", {
+                headers: {"Content-Type": "application/json"},
+                method: "PATCH",
+                body: JSON.stringify({
+                    "name": newName
+                })
+            }).then(function(response){
+                return response.json();
+            }).then(renderUpdateName);
+        }
+        function renderUpdateName(memberApi){
+            let updateResult = document.querySelector("#updateResult"); // Select <div> with id "updateResult" to render result
+            if(memberApi["ok"]===true){
+                updateResult.textContent = "更新成功";
+                // Member name became new name after response, so update it in member page
+                document.querySelector("#memberName").textContent = document.querySelector("#newName").value;
+            }
+        }
+    </script>
+</body>
+</html>
